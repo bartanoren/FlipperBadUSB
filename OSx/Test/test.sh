@@ -84,7 +84,6 @@ upload_discord() {
     fi
 }
 
-echo $dc
 # Check if Discord webhook URL is set and upload file
 if [ -n "$dc" ]; then
     upload_discord "$FileName" ""
