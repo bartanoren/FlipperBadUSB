@@ -2,6 +2,7 @@
 
 # Set up file name with timestamp and username
 FileName="$TMPDIR/$USER-LOOT-$(date '+%Y-%m-%d_%H-%M').txt"
+echo FileName
 
 #------------------------------------------------------------------------------------------------------------------------------------
 
