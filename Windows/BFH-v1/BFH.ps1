@@ -552,7 +552,9 @@ function Get-SQLiteHistoryData {
         [string]$Browser,
         [string]$DataType
     )
-    
+
+    Write-Host "Processing history data for $Browser..."
+
     # Load SQLite .NET Assembly
     Add-Type -AssemblyName "System.Data.SQLite"
 
@@ -562,29 +564,42 @@ function Get-SQLiteHistoryData {
     
     $Command = $Connection.CreateCommand()
     $Command.CommandText = $Query
-    $Reader = $Command.ExecuteReader()
 
-    # Process each row
-    while ($Reader.Read()) {
-        $Url = $Reader["url"]
-        $Title = $Reader["title"]
-        $VisitCount = $Reader["visit_count"]
-        $LastVisitTime = [System.DateTime]::FromFileTimeUtc(($Reader["last_visit_time"] * 10) + 116444736000000000)
-        
-        # Output data
-        New-Object -TypeName PSObject -Property @{
-            User = $env:UserName
-            Browser = $Browser
-            DataType = $DataType
-            URL = $Url
-            Title = $Title
-            VisitCount = $VisitCount
-            LastVisitTime = $LastVisitTime
+    try {
+        $Reader = $Command.ExecuteReader()
+        $HistoryFound = $false
+
+        # Process each row
+        while ($Reader.Read()) {
+            $Url = $Reader["url"]
+            $Title = $Reader["title"]
+            $VisitCount = $Reader["visit_count"]
+            $LastVisitTime = [System.DateTime]::FromFileTimeUtc(($Reader["last_visit_time"] * 10) + 116444736000000000)
+            
+            # Output data
+            New-Object -TypeName PSObject -Property @{
+                User = $env:UserName
+                Browser = $Browser
+                DataType = $DataType
+                URL = $Url
+                Title = $Title
+                VisitCount = $VisitCount
+                LastVisitTime = $LastVisitTime
+            }
+
+            $HistoryFound = $true
         }
+
+        if (-not $HistoryFound) {
+            Write-Host "No history data found for $Browser."
+        }
+
+    } catch {
+        Write-Host "Failed to query history data: $_"
+    } finally {
+        # Close the connection
+        $Connection.Close()
     }
-    
-    # Close the connection
-    $Connection.Close()
 }
 
 function Get-JSONBookmarkData {
@@ -593,6 +608,8 @@ function Get-JSONBookmarkData {
         [string]$Browser,
         [string]$DataType
     )
+
+    Write-Host "Processing bookmark data for $Browser..."
 
     # Load the JSON file
     $JsonData = Get-Content -Path $Path -Raw | ConvertFrom-Json
