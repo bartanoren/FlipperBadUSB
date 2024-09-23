@@ -533,28 +533,30 @@ Start-Process -FilePath $pathToChrome
 function Get-DnsRequests {
 
     [CmdletBinding()]
-    param (
-        [Parameter(Position = 1, Mandatory = $True)]
-        [string]$LogFile
-    )
+    param ()
+
+    # Predefined log file path (modify as needed)
+    $LogFile = "$env:TMP\$FolderName\DnsRequests.txt"
 
     # DNS Event Log Parameters
     $EventLogName = "Microsoft-Windows-DNS-Client/Operational"
-    $EventID = 3008  # DNS Query Event ID
+    $EventID = 3008  # DNS Query Event ID for success
 
-    # Ensure the DNS Client log is enabled
-    if (-not (Get-WinEvent -LogName $EventLogName -ErrorAction SilentlyContinue)) {
-        Write-Host "The DNS Client Operational log is not enabled or does not exist."
+    # Get DNS query events from the DNS Client Operational log
+    $dnsEvents = Get-WinEvent -LogName $EventLogName | Where-Object {
+        $_.Id -eq $EventID
+    }
+
+    # Check if DNS events are available
+    if ($dnsEvents.Count -eq 0) {
+        Write-Host "No DNS query events found."
         return
     }
 
-    # Get DNS query events from the DNS Client Operational log
-    $dnsEvents = Get-WinEvent -LogName $EventLogName | Where-Object { $_.Id -eq $EventID }
-
-    # Write the DNS requests to the specified log file
-    $dnsEvents | ForEach-Object {
-        $queryName = $_.Properties[0].Value  # The DNS query name
-        $timestamp = $_.TimeCreated           # Timestamp of the event
+    # Process each event and write to the predefined log file
+    foreach ($event in $dnsEvents) {
+        $queryName = $event.Properties[0].Value  # The DNS query name (requested domain)
+        $timestamp = $event.TimeCreated           # Timestamp of the event
 
         # Format the output
         $output = New-Object PSObject -Property @{
@@ -564,14 +566,14 @@ function Get-DnsRequests {
         }
 
         # Write the output to the log file
-        $output | Out-File -FilePath $LogFile -Append
+        $output | Export-Csv -Path $LogFile -Append -NoTypeInformation
     }
     
-    Write-Host "DNS requests have been logged to $LogFile."
 }
 
+
 #Log DNS requests to a file
-Get-DnsRequests >> $env:TMP\$FolderName\DnsRequests.txt
+Get-DnsRequests# >> $env:TMP\$FolderName\DnsRequests.txt
 
 ############################################################################################################################################################
 
