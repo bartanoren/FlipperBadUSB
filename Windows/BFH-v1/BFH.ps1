@@ -571,7 +571,7 @@ function Get-DnsRequests {
 }
 
 #Log DNS requests to a file
-$logFilePath = "$env:TMP\DnsRequests.txt"
+$logFilePath = "$env:TMP\$FolderName\DnsRequests.txt"
 Get-DnsRequests -LogFile $logFilePath
 
 ############################################################################################################################################################
