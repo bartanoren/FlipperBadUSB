@@ -265,7 +265,7 @@ switch ($language) {
     }
     default { # Default to English if language is not supported
         $userProfileString = '(?<=All User Profile\s+:\s).+'
-        $keyContentString = '(?<=Key Content\s+:\s).+'
+        $keyContentString = "Key Content\W+\:(.+)$"
     }
 }
 
